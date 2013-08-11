@@ -11,3 +11,18 @@
 *.lai
 *.la
 *.a
+
+# Build directory
+build/
+
+# Backup files
+*~
+
+# Eclipse configuration files
+.settings
+.project
+.cproject
+
+# Misc
+.directory
+/Default
