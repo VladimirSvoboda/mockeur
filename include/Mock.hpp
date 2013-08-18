@@ -15,12 +15,13 @@
 #define MOCK_HPP_
 
 #include <list>
-#include <tuple>
+#include <stdexcept>
 
 #include "CallHandler.hpp"
 #include "AbstractCallEntry.hpp"
-#include "CallEntryFactory.hpp"
-#include "internal/GenericCallEntryFactory.hpp"
+#include "MockPolicy.hpp"
+#include "internal/AbstractCallHandler.hpp"
+#include "internal/DefaultMockPolicy.hpp"
 
 /**
  * This class is templatized on the return type of the mock and the instance of the arguments' types.
@@ -40,11 +41,11 @@ public:
     Mock();
 
     /**
-     * Constructor of mock which will use the provided call entry factory to store the call entries.
+     * Constructor of mock which will act following the rules of the provided MockPolicy
      *
-     * @param callEntryFactory A pointer to the call entry factory to use
+     * @param mockPolicyPtr A pointer to the mock policy to use
      */
-    Mock(CallEntryFactory<ArgumentTypes...>* callEntryFactoryPtr);
+    Mock(MockPolicy<ReturnType, ArgumentTypes...>* providedMockPolicyPtr);
 
     /**
      * Destructor of mock
@@ -88,30 +89,50 @@ public:
      */
     ReturnType value(ArgumentTypes ... args);
 
+    /**
+     * Set the policy of the mock
+     *
+     * @param mockPolicyPtr A pointer to the mock policy to use
+     */
+    void setPolicy(MockPolicy<ReturnType, ArgumentTypes...>* providedMockPolicyPtr);
+
 private:
+    MockPolicy<ReturnType, ArgumentTypes...>* mockPolicyPtr;
     std::list<CallHandler<ReturnType, ArgumentTypes...>*> callHandlerList;
     std::list<AbstractCallEntry<ArgumentTypes...>*> callHistoryList;
-    CallEntryFactory<ArgumentTypes...>* callEntryFactory;
+    bool policyOwner; /* Used to know whether the current class must delete itself the mock policy object */
 
-    CallHandler<ReturnType, ArgumentTypes...>* getMatchingHandler(ArgumentTypes ... args) const;
+    AbstractCallHandler<ReturnType, ArgumentTypes...>* getMatchingHandler(ArgumentTypes ... args) const;
 };
 
 template<typename ReturnType, typename ... ArgumentTypes>
 Mock<ReturnType, ArgumentTypes...>::Mock()
-    : Mock<ReturnType, ArgumentTypes...>::Mock(new GenericCallEntryFactory<ArgumentTypes...>)
+    : Mock<ReturnType, ArgumentTypes...>::Mock(new DefaultMockPolicy<ReturnType, ArgumentTypes...>)
 {
+    policyOwner = true;
 }
 
 template<typename ReturnType, typename ... ArgumentTypes>
-Mock<ReturnType, ArgumentTypes...>::Mock(CallEntryFactory<ArgumentTypes...>* callEntryFactoryPtr)
-    : callHandlerList(), callHistoryList(), callEntryFactory(callEntryFactoryPtr)
+Mock<ReturnType, ArgumentTypes...>::Mock(MockPolicy<ReturnType, ArgumentTypes...>* providedMockPolicyPtr)
+    : mockPolicyPtr(providedMockPolicyPtr), callHandlerList(), callHistoryList(), policyOwner(false)
 {
 }
 
 template<typename ReturnType, typename ... ArgumentTypes>
 Mock<ReturnType, ArgumentTypes...>::~Mock()
 {
-    clear();
+    for (auto it = callHandlerList.begin(); it != callHandlerList.end(); ++it)
+        delete *it;
+
+    callHandlerList.clear();
+
+    callHistoryList.clear();
+
+    if (policyOwner) {
+        mockPolicyPtr->clear();
+
+        delete mockPolicyPtr;
+    }
 }
 
 template<typename ReturnType, typename ... ArgumentTypes>
@@ -128,9 +149,9 @@ inline CallHandler<ReturnType, ArgumentTypes...> * Mock<ReturnType, ArgumentType
 template<typename ReturnType, typename ... ArgumentTypes>
 inline ReturnType Mock<ReturnType, ArgumentTypes...>::value(ArgumentTypes ... args)
 {
-    CallHandler<ReturnType, ArgumentTypes...>* callHandlerPtr = getMatchingHandler(args...);
+    AbstractCallHandler<ReturnType, ArgumentTypes...>* callHandlerPtr = getMatchingHandler(args...);
 
-    callHistoryList.push_back(callEntryFactory->create(args...));
+    callHistoryList.push_back(mockPolicyPtr->create(args...));
 
     return callHandlerPtr->value(args...);
 }
@@ -150,6 +171,17 @@ inline unsigned int Mock<ReturnType, ArgumentTypes...>::numberOfCalls(
 }
 
 template<typename ReturnType, typename ... ArgumentTypes>
+void Mock<ReturnType, ArgumentTypes...>::setPolicy(MockPolicy<ReturnType, ArgumentTypes...>* providedMockPolicyPtr)
+{
+    if (policyOwner) {
+        delete mockPolicyPtr;
+    }
+
+    mockPolicyPtr = providedMockPolicyPtr;
+    policyOwner = false;
+}
+
+template<typename ReturnType, typename ... ArgumentTypes>
 inline void Mock<ReturnType, ArgumentTypes...>::clear()
 {
     for (auto it = callHandlerList.begin(); it != callHandlerList.end(); ++it)
@@ -159,11 +191,11 @@ inline void Mock<ReturnType, ArgumentTypes...>::clear()
 
     callHistoryList.clear();
 
-    callEntryFactory->clear();
+    mockPolicyPtr->clear();
 }
 
 template<typename ReturnType, typename ... ArgumentTypes>
-inline CallHandler<ReturnType, ArgumentTypes...>* Mock<ReturnType, ArgumentTypes...>::getMatchingHandler(
+AbstractCallHandler<ReturnType, ArgumentTypes...>* Mock<ReturnType, ArgumentTypes...>::getMatchingHandler(
     ArgumentTypes ... args) const
 {
     for (CallHandler<ReturnType, ArgumentTypes...>* callHandlerPtr : callHandlerList) {
@@ -171,7 +203,7 @@ inline CallHandler<ReturnType, ArgumentTypes...>* Mock<ReturnType, ArgumentTypes
             return callHandlerPtr;
     }
 
-    throw "Mock object is not configured for these values.";
+    return mockPolicyPtr->getHandler(args...);
 }
 
 #endif /* MOCK_HPP_ */

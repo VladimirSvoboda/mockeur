@@ -46,7 +46,7 @@ class CallHandler;
  * method then.
  */
 template<typename ... ArgumentTypes>
-class CallHandler<void, ArgumentTypes...> : public AbstractCallHandler<void, ArgumentTypes...>
+class CallHandler<void, ArgumentTypes...> : public AbstractCallHandler_impl<void, ArgumentTypes...>
 {
 public:
     /**
@@ -55,7 +55,7 @@ public:
      * @param args Instance of argument matchers for the types of the handlers
      */
     CallHandler(AbstractArgumentMatcher<ArgumentTypes>* ... args)
-        : AbstractCallHandler<void, ArgumentTypes...>(args...)
+        : AbstractCallHandler_impl<void, ArgumentTypes...>(args...)
     {
     }
 
@@ -83,7 +83,7 @@ public:
  * to the method then.
  */
 template<typename ReturnType, typename ... ArgumentTypes>
-class CallHandler: public AbstractCallHandler<ReturnType, ArgumentTypes...>
+class CallHandler: public AbstractCallHandler_impl<ReturnType, ArgumentTypes...>
 {
 public:
     /**
@@ -92,7 +92,7 @@ public:
      * @param args Instance of argument matchers for the types of the handlers
      */
     CallHandler(AbstractArgumentMatcher<ArgumentTypes>* ... args)
-        : AbstractCallHandler<ReturnType, ArgumentTypes...>(args...)
+        : AbstractCallHandler_impl<ReturnType, ArgumentTypes...>(args...)
     {
     }
 

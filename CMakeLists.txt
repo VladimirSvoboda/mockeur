@@ -18,7 +18,9 @@ cmake_minimum_required(VERSION 2.8.6)
 set(MOCKEUR_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(MOCKEUR_INCLUDE_DIR ${MOCKEUR_DIR}/include)
 set(MOCKEUR_SRC_DIR ${MOCKEUR_DIR}/src)
-set(MOCKEUR_TEST_SRC_DIR ${MOCKEUR_DIR}/test)
+set(MOCKEUR_TEST_DIR ${MOCKEUR_DIR}/test)
+set(MOCKEUR_TEST_INCLUDE_DIR ${MOCKEUR_TEST_DIR}/include)
+set(MOCKEUR_TEST_SRC_DIR ${MOCKEUR_TEST_DIR}/src)
 
 ########################################################################
 # Compiler flags
@@ -66,6 +68,8 @@ set(MOCKEUR_SRCS
 ########################################################################
 
 if (MOCKEUR_TEST)
+    include_directories(${MOCKEUR_TEST_INCLUDE_DIR})
+
     set(MOCKEUR_TEST_SRCS
         ${MOCKEUR_TEST_SRC_DIR}/MockTest.cpp
     )

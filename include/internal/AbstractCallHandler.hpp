@@ -15,21 +15,23 @@
 
 #include <functional>
 
-/**
- * Abstract implementation for CallHandler. Everything in this class is common for both void return type and anything else.
- * @see CallHandler
- */
 template<typename ReturnType, typename ... ArgumentTypes>
 class AbstractCallHandler
 {
 public:
     /**
+     * Default constructor of AbstractCallHandler
+     */
+    AbstractCallHandler()
+    {
+    }
+
+    /**
      * Constructor of AbstractCallHandler
      *
      * @param args Instance of argument matchers for the types of the handlers
      */
-    AbstractCallHandler(AbstractArgumentMatcher<ArgumentTypes>* ... args)
-        : matchers(args...), callbackFunction()
+    AbstractCallHandler(AbstractArgumentMatcher<ArgumentTypes>* ...)
     {
     }
 
@@ -37,6 +39,48 @@ public:
      * Destructor of AbstractCallHandler
      */
     virtual ~AbstractCallHandler()
+    {
+    }
+
+    /**
+     * Returns the stored value for the given arguments. It may be some logic (a function called with these arguments)
+     * @param args The instance of arguments
+     *
+     * @return The stored value for the given arguments.
+     */
+    virtual ReturnType value(ArgumentTypes ... args) = 0;
+
+    /**
+     * Returns whether the current object matches this instance of arguments.
+     *
+     * @param args The instance of arguments.
+     * @return Whether the current object matches this instance of arguments.
+     */
+    virtual bool matchArguments(ArgumentTypes ... args) = 0;
+};
+
+/**
+ * Abstract implementation for CallHandler. Everything in this class is common for both void return type and anything else.
+ * @see CallHandler
+ */
+template<typename ReturnType, typename ... ArgumentTypes>
+class AbstractCallHandler_impl : public AbstractCallHandler<ReturnType, ArgumentTypes...>
+{
+public:
+    /**
+     * Constructor of AbstractCallHandler_impl
+     *
+     * @param args Instance of argument matchers for the types of the handlers
+     */
+    AbstractCallHandler_impl(AbstractArgumentMatcher<ArgumentTypes>* ... args)
+        : AbstractCallHandler<ReturnType, ArgumentTypes...>(args...), matchers(args...), callbackFunction()
+    {
+    }
+
+    /**
+     * Destructor of AbstractCallHandler_impl
+     */
+    virtual ~AbstractCallHandler_impl()
     {
     }
 
