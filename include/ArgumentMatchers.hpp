@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2013 Vladimir Svoboda
+ * (c) Copyright 2013-2014 Vladimir Svoboda
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE in this distribution.
@@ -9,7 +9,8 @@
  * @file ArgumentMatchers.hpp
  *
  * Declaration and definition of the ArgumentMatcher class.
- * Inspiration for this implementation comes from the tuple class implementation of GCC.
+ * Inspiration for this implementation comes from the tuple class
+ * implementation of GCC.
  */
 
 #ifndef ARGUMENTMATCHERS_HPP_
@@ -20,7 +21,8 @@
 #include "ArgumentMatcher/AbstractArgumentMatcher.hpp"
 
 /**
- * The ArgumentMatchers class is there for one thing, one thing only: tell whether it matches an instance of arguments.
+ * The ArgumentMatchers class is there for one thing, one thing only: tell
+ * whether it matches an instance of arguments.
  * This class actually encapsulates an instance of argument matchers.
  */
 template<typename ... ArgTypes>

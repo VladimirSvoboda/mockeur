@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2013 Vladimir Svoboda
+ * (c) Copyright 2013-2014 Vladimir Svoboda
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE.txt in this distribution.
@@ -16,7 +16,8 @@
 #include "internal/BaseArgumentMatcher.hpp"
 
 /**
- * Abstract class for argument matchers. It declares a fully virtual match method.
+ * Abstract class for argument matchers. It declares a fully virtual match
+ * method.
  */
 template<typename Type>
 class AbstractArgumentMatcher: public BaseArgumentMatcher
@@ -34,10 +35,10 @@ public:
     /**
      * Returns whether the object matches the argument.
      *
-     * @param The argument to match.
+     * @param arg The argument to match.
      * @return Whether the object matches the argument.
      */
-    virtual bool match(Type) const = 0;
+    virtual bool match(Type arg) const = 0;
 };
 
 #endif /* ABSTRACT_ARGUMENT_MATCHER_HPP_ */

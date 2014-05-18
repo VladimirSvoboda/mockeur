@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2013 Vladimir Svoboda
+ * (c) Copyright 2013-2014 Vladimir Svoboda
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE in this distribution.
@@ -33,10 +33,12 @@ public:
     }
 
     /**
-     * Returns whether the current object is matched by the instance of argument matchers.
+     * Returns whether the current object is matched by the instance of
+     * argument matchers.
      *
      * @param matchersPtr Pointers to argument matchers
-     * @return Whether the current object is matched by the instance of argument matchers.
+     * @return Whether the current object is matched by the instance of
+     *         argument matchers.
      */
     virtual bool acceptedBy(AbstractArgumentMatcher<ArgTypes>* ... matchersPtr) const = 0;
 };

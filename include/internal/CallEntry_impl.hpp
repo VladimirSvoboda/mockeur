@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2013 Vladimir Svoboda
+ * (c) Copyright 2013-2014 Vladimir Svoboda
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE in this distribution.
@@ -7,17 +7,17 @@
 
 /**
  * @file CallEntry_impl.hpp
- * @brief Declaration and definition of private structure CallEntry_impl
+ * @brief Declaration and definition of private class CallEntry_impl
  */
 
 #ifndef CALLENTRY_IMPL_HPP_
 #define CALLENTRY_IMPL_HPP_
 
 template<typename ... ArgumentTypes>
-struct CallEntry_impl;
+class CallEntry_impl;
 
 template<>
-struct CallEntry_impl<>
+class CallEntry_impl<>
 {
 public:
     CallEntry_impl()
@@ -38,7 +38,7 @@ public:
  * The structure is defined recursively.
  */
 template<typename CurrentArgType, typename ... OtherArgTypes>
-struct CallEntry_impl<CurrentArgType, OtherArgTypes...> : CallEntry_impl<OtherArgTypes...>
+class CallEntry_impl<CurrentArgType, OtherArgTypes...> : CallEntry_impl<OtherArgTypes...>
 {
 public:
     CallEntry_impl(CurrentArgType currentEntry, OtherArgTypes ... otherEntries)
@@ -53,7 +53,8 @@ public:
     virtual bool acceptedBy(AbstractArgumentMatcher<CurrentArgType>* currentMatcher,
                     AbstractArgumentMatcher<OtherArgTypes>* ... otherMatchers) const
     {
-        return currentMatcher->match(savedEntry) && CallEntry_impl<OtherArgTypes...>::acceptedBy(otherMatchers...);
+        return currentMatcher->match(savedEntry)
+               && CallEntry_impl<OtherArgTypes...>::acceptedBy(otherMatchers...);
     }
 
 private:

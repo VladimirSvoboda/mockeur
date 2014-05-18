@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2013 Vladimir Svoboda
+ * (c) Copyright 2013-2014 Vladimir Svoboda
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE in this distribution.
@@ -7,7 +7,7 @@
 
 /**
  * @file DefaultMockPolicy.hpp
- * @brief 
+ * @brief Implementation of the default @ref MockPolicy
  */
 
 #ifndef DEFAULTMOCKPOLICY_HPP_
@@ -22,6 +22,11 @@
 #include <list>
 #include <stdexcept>
 
+
+/**
+ * DefaultCallHandler matches any arguments and always throws an exception
+ * when its value method is called.
+ */
 template<typename ReturnType, typename ... ArgumentTypes>
 class DefaultCallHandler: public AbstractCallHandler<ReturnType, ArgumentTypes...>
 {
@@ -44,10 +49,12 @@ public:
     }
 
     /**
-     * Returns the stored value for the given arguments. It may be some logic (a function called with these arguments)
+     * Throws a @ref std::runtime_error telling that the @ref Mock object has
+     * not been configured for these arguments.
+     *
      * @param args The instance of arguments
      *
-     * @return The stored value for the given arguments.
+     * @throws A @ref std::runtime_error
      */
     ReturnType value(ArgumentTypes ...)
     {
@@ -55,10 +62,10 @@ public:
     }
 
     /**
-     * Returns whether the current object matches this instance of arguments.
+     * Returns true.
      *
      * @param args The instance of arguments.
-     * @return Whether the current object matches this instance of arguments.
+     * @return true
      */
     bool matchArguments(ArgumentTypes ...)
     {
@@ -66,6 +73,11 @@ public:
     }
 };
 
+/**
+ * DefaultMockPolicy uses the copy constructor to copy arguments to a list and
+ * it provides a @ref DefaultCallHandler, which always throws an exception, to
+ * handle unexpected calls.
+ */
 template<typename ReturnType, typename ... ArgumentTypes>
 class DefaultMockPolicy: public MockPolicy<ReturnType, ArgumentTypes...>
 {

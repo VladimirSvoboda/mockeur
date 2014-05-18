@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2013 Vladimir Svoboda
+ * (c) Copyright 2013-2014 Vladimir Svoboda
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE.txt in this distribution.
@@ -36,7 +36,7 @@ public:
     /**
      * Dynamically creates a matcher for the provided value.
      *
-     * @param arg The value to matcher.
+     * @param arg The value to match.
      * @return A pointer to a newly created matcher.
      */
     template<typename Type>
@@ -52,7 +52,6 @@ public:
     /**
      * Dynamically creates a matcher for the provided type.
      *
-     * @param arg The type to match.
      * @return A pointer to a newly created matcher.
      */
     template<typename Type>

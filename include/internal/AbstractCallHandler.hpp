@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2013 Vladimir Svoboda
+ * (c) Copyright 2013-2014 Vladimir Svoboda
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE in this distribution.
@@ -43,7 +43,8 @@ public:
     }
 
     /**
-     * Returns the stored value for the given arguments. It may be some logic (a function called with these arguments)
+     * Returns the stored value for the given arguments. It may involve
+     * computations as a true function can be registered.
      * @param args The instance of arguments
      *
      * @return The stored value for the given arguments.
@@ -60,7 +61,8 @@ public:
 };
 
 /**
- * Abstract implementation for CallHandler. Everything in this class is common for both void return type and anything else.
+ * Abstract implementation for CallHandler. Everything in this class is common
+ * for both void return type and anything else.
  * @see CallHandler
  */
 template<typename ReturnType, typename ... ArgumentTypes>
@@ -73,7 +75,9 @@ public:
      * @param args Instance of argument matchers for the types of the handlers
      */
     AbstractCallHandler_impl(AbstractArgumentMatcher<ArgumentTypes>* ... args)
-        : AbstractCallHandler<ReturnType, ArgumentTypes...>(args...), matchers(args...), callbackFunction()
+        : AbstractCallHandler<ReturnType, ArgumentTypes...>(args...),
+          matchers(args...),
+          callbackFunction()
     {
     }
 

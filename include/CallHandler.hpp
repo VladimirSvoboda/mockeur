@@ -111,7 +111,8 @@ public:
      * Instantiates the CallHandler object to return the provided argument when
      * called.
      *
-     * @param valueToReturn The argument to return when the value of the object is called.
+     * @param valueToReturn The argument to return when the value of the object
+     *                      is called.
      */
     void thenReturn(ReturnType valueToReturn)
     {

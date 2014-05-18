@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2013 Vladimir Svoboda
+ * (c) Copyright 2013-2014 Vladimir Svoboda
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE.txt in this distribution.
@@ -17,14 +17,14 @@
  * Declaration of the ArgumentMatchers_impl
  */
 template<typename ... ArgumentTypes>
-struct ArgumentMatchers_impl;
+class ArgumentMatchers_impl;
 
 /**
- * Implementation of ArgumentMatchers_impl without any template parameters (a matcher matching no argument).
- * It always returns true.
+ * Implementation of ArgumentMatchers_impl without any template parameters (a
+ * matcher matching no argument). It always returns true.
  */
 template<>
-struct ArgumentMatchers_impl<>
+class ArgumentMatchers_impl<>
 {
 public:
     /**
@@ -54,15 +54,16 @@ public:
 
 /**
  * Implementation of ArgumentMatchers_impl with at least one template parameter.
- * The structure is defined recursively. The parent class is either:
- *  - the structure itself with one template parameter less;
- *  - the above structure which takes no template parameter.
+ * The class is defined recursively. The parent class is either:
+ *  - the class itself with one template parameter less;
+ *  - the above class which takes no template parameter.
  *
- * It checks if it matches the current argument and if it is the case, forward the remaining checks to the parent class.
+ * It checks if it matches the current argument and if it is the case, forward
+ * the remaining checks to the parent class.
  */
 
 template<typename CurrentArgType, typename ... OtherArgTypes>
-struct ArgumentMatchers_impl<CurrentArgType, OtherArgTypes...> : ArgumentMatchers_impl<OtherArgTypes...>
+class ArgumentMatchers_impl<CurrentArgType, OtherArgTypes...> : ArgumentMatchers_impl<OtherArgTypes...>
 {
 public:
     /**
