@@ -3,7 +3,7 @@
 #
 # Example of a user CMake-based project using mockeur:
 #
-# project(FOO CXX)
+# project(FOO C CXX)
 # include(path/to/mockeur/root)
 # include_directories(path/to/mockeur/include/dir)
 # add_executable(foo foo.cpp)
@@ -18,9 +18,11 @@ cmake_minimum_required(VERSION 2.8.6)
 set(MOCKEUR_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(MOCKEUR_INCLUDE_DIR ${MOCKEUR_DIR}/include)
 set(MOCKEUR_SRC_DIR ${MOCKEUR_DIR}/src)
-set(MOCKEUR_TEST_DIR ${MOCKEUR_DIR}/test)
-set(MOCKEUR_TEST_INCLUDE_DIR ${MOCKEUR_TEST_DIR}/include)
-set(MOCKEUR_TEST_SRC_DIR ${MOCKEUR_TEST_DIR}/src)
+
+########################################################################
+# Options
+########################################################################
+option(MOCKEUR_TEST "Compile the test of the Mockeur library" OFF)
 
 ########################################################################
 # Compiler flags
@@ -30,18 +32,16 @@ set(MOCKEUR_TEST_SRC_DIR ${MOCKEUR_TEST_DIR}/src)
 # Add C++11 flag
 #-----------------------------------
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(ENABLE_CXX11 "-std=c++11")
-
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
         set(ENABLE_CXX11 "-std=c++0x")
     else()
         set(ENABLE_CXX11 "-std=c++11")
     endif()
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(ENABLE_CXX11 "-std=c++11")
 endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
 
 #-----------------------------------
 # Add warning flags
@@ -56,7 +56,7 @@ endif()
 # Source files registration
 ########################################################################
 
-# Where Mockeur's .h files can be found.
+# Location of Mockeur header files
 include_directories(${MOCKEUR_INCLUDE_DIR})
 
 set(MOCKEUR_SRCS
@@ -66,16 +66,8 @@ set(MOCKEUR_SRCS
 ########################################################################
 # Unit tests
 ########################################################################
-
 if (MOCKEUR_TEST)
-    include_directories(${MOCKEUR_TEST_INCLUDE_DIR})
-
-    set(MOCKEUR_TEST_SRCS
-        ${MOCKEUR_TEST_SRC_DIR}/MockTest.cpp
-    )
-    
-    add_executable(mockeur-test ${MOCKEUR_TEST_SRCS})
-    target_link_libraries(mockeur-test mockeur)
+    add_subdirectory(test)
 endif()
 
 ########################################################################
