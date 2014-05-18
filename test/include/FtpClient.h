@@ -21,6 +21,17 @@ typedef struct
 } File_s;
 
 /**
+ * Data representation model defined in FTP
+ */
+enum DataModel
+{
+    ASCII,
+    BINARY,
+    EBCDIC,
+    LOCAL
+};
+
+/**
  * Send the provided bytes over a FTP connection.
  * Important: this function will be mocked.
  *
@@ -30,6 +41,20 @@ typedef struct
  * @return The number of bytes sent
  */
 int ftp_send(const char* content, unsigned int length);
+
+/**
+ * Return the data model currently use to send data
+ *
+ * @return The data model currently use to send data
+ */
+enum DataModel ftp_getDataModel(void);
+
+/**
+ * Set the data model to use for further transfer.
+ *
+ * @param dataModel The data model to use
+ */
+void ftp_setDataModel(enum DataModel dataModel);
 
 /**
  * Try to send the provided file to some FTP server and return whether it

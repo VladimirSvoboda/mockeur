@@ -20,6 +20,73 @@
 #include "internal/AbstractCallHandler.hpp"
 
 /**
+ * Abstract implementation for CallHandler. Everything in this class is common
+ * for both void return type and anything else.
+ * @see CallHandler
+ */
+template<typename ReturnType, typename ... ArgumentTypes>
+class CallHandler_impl : public AbstractCallHandler<ReturnType, ArgumentTypes...>
+{
+public:
+    /**
+     * Constructor of CallHandler_impl
+     *
+     * @param args Instance of argument matchers for the types of the handlers
+     */
+    CallHandler_impl(AbstractArgumentMatcher<ArgumentTypes>* ... args)
+        : AbstractCallHandler<ReturnType, ArgumentTypes...>(args...),
+          matchers(args...),
+          callbackFunction()
+    {
+    }
+
+    /**
+     * Destructor of CallHandler_impl
+     */
+    virtual ~CallHandler_impl()
+    {
+    }
+
+    /**
+     * @brief Callback function to call when the value function is called.
+     * The arguments will be forwarded to the callback function.
+     *
+     * @param fct The callback function
+     */
+    virtual void then(const std::function<ReturnType(ArgumentTypes...)> fct)
+    {
+        callbackFunction = fct;
+    }
+
+    /**
+     * Returns the stored value for the given arguments. It may be some logic (a function called with these arguments)
+     * @param args The instance of arguments
+     *
+     * @return The stored value for the given arguments.
+     */
+    ReturnType value(ArgumentTypes ... args)
+    {
+        return callbackFunction(args...);
+    }
+
+    /**
+     * Returns whether the current object matches this instance of arguments.
+     *
+     * @param args The instance of arguments.
+     * @return Whether the current object matches this instance of arguments.
+     */
+    bool matchArguments(ArgumentTypes ... args)
+    {
+        return matchers.matchArguments(args...);
+    }
+
+protected:
+    ArgumentMatchers<ArgumentTypes...> matchers;
+    std::function<ReturnType(ArgumentTypes...)> callbackFunction;
+};
+
+
+/**
  * The CallHandler class handles an instance of arguments and executes the
  * recorded instructions on the arguments. The instance of argument matchers
  * has to be provided to the constructor of the class.
@@ -49,7 +116,7 @@ class CallHandler;
  * which does nothing and forwards it to the method then.
  */
 template<typename ... ArgumentTypes>
-class CallHandler<void, ArgumentTypes...> : public AbstractCallHandler_impl<void, ArgumentTypes...>
+class CallHandler<void, ArgumentTypes...> : public CallHandler_impl<void, ArgumentTypes...>
 {
 public:
     /**
@@ -58,7 +125,7 @@ public:
      * @param args Instance of argument matchers for the types of the handlers
      */
     CallHandler(AbstractArgumentMatcher<ArgumentTypes>* ... args)
-        : AbstractCallHandler_impl<void, ArgumentTypes...>(args...)
+        : CallHandler_impl<void, ArgumentTypes...>(args...)
     {
     }
 
@@ -78,6 +145,8 @@ public:
     }
 };
 
+
+
 /**
  * Implementation of the CallHandler when the return type is anything but void
  * (this implementation would fail with void return type because of the
@@ -87,7 +156,7 @@ public:
  * returning the valueToReturn and forwards it to the method "then".
  */
 template<typename ReturnType, typename ... ArgumentTypes>
-class CallHandler: public AbstractCallHandler_impl<ReturnType, ArgumentTypes...>
+class CallHandler: public CallHandler_impl<ReturnType, ArgumentTypes...>
 {
 public:
     /**
@@ -96,7 +165,7 @@ public:
      * @param args Instance of argument matchers for the types of the handlers
      */
     CallHandler(AbstractArgumentMatcher<ArgumentTypes>* ... args)
-        : AbstractCallHandler_impl<ReturnType, ArgumentTypes...>(args...)
+        : CallHandler_impl<ReturnType, ArgumentTypes...>(args...)
     {
     }
 

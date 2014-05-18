@@ -19,6 +19,9 @@ int sendFile (File_s* filePtr)
     int totalBytesSent = 0;
     const int bytesToSend = filePtr->length;
 
+    if (ftp_getDataModel() != BINARY)
+        ftp_setDataModel(BINARY);
+
     do {
         bytesSent = ftp_send(&(filePtr->content[bytesSent]), bytesToSend-totalBytesSent);
 

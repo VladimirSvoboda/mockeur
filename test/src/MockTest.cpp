@@ -24,12 +24,31 @@ extern "C"
 #include <cstdlib>
 #include <stdexcept>
 
-/* Declaration of the mock and definition of the mocked function */
+/* Declaration of the mocks and definition of the mocked function */
 Mock<int, const char*, unsigned int> mock_ftp_send;
+Mock<enum DataModel> mock_ftp_getDataModel;
+Mock<void, enum DataModel> mock_ftp_setDataModel;
 
 int ftp_send(const char* content, unsigned int length)
 {
     return mock_ftp_send.value(content, length);
+}
+
+enum DataModel ftp_getDataModel(void)
+{
+    return mock_ftp_getDataModel.value();
+}
+
+void ftp_setDataModel(enum DataModel dataModel)
+{
+    mock_ftp_setDataModel.value(dataModel);
+}
+
+void tearDown()
+{
+    mock_ftp_send.clear();
+    mock_ftp_getDataModel.clear();
+    mock_ftp_setDataModel.clear();
 }
 
 /* First unit test */
@@ -43,13 +62,17 @@ void testDirectlySendFullContent(void)
                        ArgumentMatcher::any<unsigned int>())
                  ->thenReturn(filePtr->length);
 
+    mock_ftp_getDataModel.when()->thenReturn(BINARY);
+
     int succeedToSend = sendFile(filePtr);
 
     assert(1u == mock_ftp_send.numberOfCalls(ArgumentMatcher::eq<const char*>(filePtr->content),
                                              ArgumentMatcher::eq<unsigned int>(filePtr->length)));
+    assert(1u == mock_ftp_getDataModel.numberOfCalls());
+    assert(0u == mock_ftp_setDataModel.numberOfCalls(ArgumentMatcher::any<enum DataModel>()));
     assert(succeedToSend);
 
-    mock_ftp_send.clear();
+    tearDown();
 }
 
 void testUnableToSendAnyByte(void)
@@ -62,13 +85,20 @@ void testUnableToSendAnyByte(void)
                        ArgumentMatcher::any<unsigned int>())
                  ->thenReturn(0);
 
+    mock_ftp_getDataModel.when()->thenReturn(ASCII);
+    mock_ftp_setDataModel.when(ArgumentMatcher::any<enum DataModel>())->then(
+        [] (enum DataModel) {}
+    );
+
     int succeedToSend = sendFile(filePtr);
 
     assert(1u == mock_ftp_send.numberOfCalls(ArgumentMatcher::any<const char*>(),
                                              ArgumentMatcher::any<unsigned int>()));
+    assert(1u == mock_ftp_getDataModel.numberOfCalls());
+    assert(1u == mock_ftp_setDataModel.numberOfCalls(ArgumentMatcher::eq<enum DataModel>(BINARY)));
     assert(!succeedToSend);
 
-    mock_ftp_send.clear();
+    tearDown();
 }
 
 void testSendInTwoTimesWithSpecializedMatcher(void)
@@ -76,6 +106,8 @@ void testSendInTwoTimesWithSpecializedMatcher(void)
     File_s* filePtr = new File_s;
     filePtr->content = "Hello world!";
     filePtr->length = 13;
+
+    mock_ftp_getDataModel.when()->thenReturn(BINARY);
 
     /* First time, it only send the first 5 bytes */
     mock_ftp_send.when(ArgumentMatcher::eq<const char*>(filePtr->content),
@@ -91,9 +123,11 @@ void testSendInTwoTimesWithSpecializedMatcher(void)
 
     assert(2u == mock_ftp_send.numberOfCalls(ArgumentMatcher::any<const char*>(),
                                              ArgumentMatcher::any<unsigned int>()));
+    assert(1u == mock_ftp_getDataModel.numberOfCalls());
+    assert(0u == mock_ftp_setDataModel.numberOfCalls(ArgumentMatcher::any<enum DataModel>()));
     assert(succeedToSend);
 
-    mock_ftp_send.clear();
+    tearDown();
 }
 
 void testSetPolicy(void)
@@ -104,6 +138,8 @@ void testSetPolicy(void)
                        ArgumentMatcher::eq<unsigned int>(128u))
                  ->thenReturn(0);
     mock_ftp_send.setPolicy(&mockPolicy);
+
+    mock_ftp_getDataModel.when()->thenReturn(BINARY);
 
     File_s* filePtr = new File_s;
     filePtr->content = "Hello world!";
@@ -117,7 +153,7 @@ void testSetPolicy(void)
         /* Expected */
     }
 
-    mock_ftp_send.clear();
+    tearDown();
 }
 
 int main (int, const char* [])
