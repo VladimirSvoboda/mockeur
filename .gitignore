@@ -18,10 +18,12 @@ build/
 # Backup files
 *~
 
-# Eclipse configuration files
+# IDE configuration files
 .settings
 .project
 .cproject
+.kdev4/
+*.kdev4
 
 # Misc
 .directory
