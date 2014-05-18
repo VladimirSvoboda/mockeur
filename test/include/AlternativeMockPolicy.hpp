@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2013 Vladimir Svoboda
+ * (c) Copyright 2013-2014 Vladimir Svoboda
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE in this distribution.
@@ -7,7 +7,7 @@
 
 /**
  * @file AlternativeMockPolicy.hpp
- * @brief 
+ * @brief
  */
 
 #ifndef ALTERNATIVEMOCKPOLICY_HPP_

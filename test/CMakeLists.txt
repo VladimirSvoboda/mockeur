@@ -1,4 +1,4 @@
-project(mockeur CXX)
+project(mockeur C CXX)
 cmake_minimum_required(VERSION 2.8)
 
 ########################################################################
@@ -12,6 +12,7 @@ set(MOCKEUR_TEST_SRC_DIR ${MOCKEUR_TEST_DIR}/src)
 include_directories(${MOCKEUR_TEST_INCLUDE_DIR})
 
 set(MOCKEUR_TEST_SRCS
+    ${MOCKEUR_TEST_SRC_DIR}/FtpClient.c
     ${MOCKEUR_TEST_SRC_DIR}/MockTest.cpp
 )
 
