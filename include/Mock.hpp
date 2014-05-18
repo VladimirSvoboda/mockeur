@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2013 Vladimir Svoboda
+ * (c) Copyright 2013-2014 Vladimir Svoboda
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE in this distribution.
@@ -8,14 +8,14 @@
 /**
  * @file Mock.hpp
  *
- * Declaration and definition of the Mock class. It is the entry point to the library.
+ * Declaration and definition of the Mock class. It is the entry point to the
+ * library.
  */
 
 #ifndef MOCK_HPP_
 #define MOCK_HPP_
 
 #include <list>
-#include <stdexcept>
 
 #include "CallHandler.hpp"
 #include "AbstractCallEntry.hpp"
@@ -24,11 +24,12 @@
 #include "internal/DefaultMockPolicy.hpp"
 
 /**
- * This class is templatized on the return type of the mock and the instance of the arguments' types.
+ * This class is templatized on the return type of the mock and the instance of
+ * the arguments types.
  * Example:
  *  For a function declared as:
  *   char *strncat(char *dest, const char *src, size_t n)
- *  The related CallHandler instances must be templatized as:
+ *  The related Mock instances must be templatized as:
  *   Mock<char*, char*, const char*, size_t>
  */
 template<typename ReturnType, typename ... ArgumentTypes>
@@ -36,12 +37,18 @@ class Mock
 {
 public:
     /**
-     * Default constructor of mock
+     * Default constructor of mock object.
+     *
+     * It uses the default @ref MockPolicy implementation which:
+     *  - uses the "=" operator to store results for later comparisons
+     *  - throws an exception whenever no instance of matchers match the
+     *    arguments.
      */
     Mock();
 
     /**
-     * Constructor of mock which will act following the rules of the provided MockPolicy
+     * Constructor of mock which will act following the rules of the provided
+     * @ref MockPolicy
      *
      * @param mockPolicyPtr A pointer to the mock policy to use
      */
@@ -53,39 +60,54 @@ public:
     virtual ~Mock();
 
     /**
-     * Reset the mock to the initial state. The history and the instance of arguments matchers are removed.
+     * Reset the mock to the initial state. The history and the instance of
+     * arguments matchers are removed.
      */
     void clear();
 
     /**
-     * @brief Initialize the mock to match some arguments with an instance of argument matchers.
-     * It returns a new CallHandler which must be initialized to return the expected value.
+     * @brief Initialize the mock to match some arguments with an instance of
+     *        argument matchers. It returns a new @ref CallHandler which must
+     *        be initialized to return the expected value.
      *
-     * @param matchersPtr Pointers to argument matchers (the instance of argument matchers).
-     * @return A call handler which will match the same arguments as the instance of argument matchers.
+     * @param matchersPtr Pointers to argument matchers (the instance of
+     *                    argument matchers).
+     * @return A call handler which will match the same arguments as the
+     *         instance of argument matchers.
      */
     CallHandler<ReturnType, ArgumentTypes...>* when(AbstractArgumentMatcher<ArgumentTypes>* ... matchersPtr);
 
     /**
-     * @brief Returns the number of calls to this mock which are matched by the provided instance of argument matchers.
-     * The provided arguments matchers may never have been used with the when() method.
+     * @brief Returns the number of calls to this mock which are matched by the
+     *        provided instance of argument matchers.
      *
-     * @param matchersPtr Pointers to argument matchers (the instance of argument matchers).
+     * Remark: it is not necessary to use the same matchers than in the @ref
+     * when method.
+     *
+     * @param matchersPtr Pointers to argument matchers (the instance of argument
+     *                    matchers).
      *
      * @return The number of calls matched by the instance of argument matchers.
      */
     unsigned int numberOfCalls(AbstractArgumentMatcher<ArgumentTypes>* ... matchersPtr) const;
 
     /**
-     * @brief Returns the value which has been stored for the provided instance of arguments.
-     * If the mock has not been initialized for these values (no instance of matchers which matches this instance of
-     * arguments), this function throws an exception.
+     * @brief Returns the value which has been stored for the provided instance
+     *        of arguments.
      *
-     * Remark: if a call to the mock is matched by multiple CallHandler, the first one that has been instantiated will
-     * handle the call.
+     * When this method is called on a mock with arguments that are not matched
+     * by any of the argument matchers, then it will rely on the value returned
+     * by the @ref CallHandler specified by the @ref MockPolicy (the default
+     * MockPolicy throws an exception).
      *
-     * @param args The arguments of the call to the mock (the instance of arguments).
-     * @return The value which has been stored for the provided instance of arguments.
+     * Remark: if a call to the mock is matched by multiple CallHandler, the
+     * first one that has been instantiated will handle the call.
+     *
+     * @param args The arguments of the call to the mock (the instance of
+     *             arguments).
+     *
+     * @return The value which has been stored/computed for the provided
+     *         instance of arguments.
      */
     ReturnType value(ArgumentTypes ... args);
 
@@ -147,7 +169,7 @@ inline CallHandler<ReturnType, ArgumentTypes...> * Mock<ReturnType, ArgumentType
 }
 
 template<typename ReturnType, typename ... ArgumentTypes>
-inline ReturnType Mock<ReturnType, ArgumentTypes...>::value(ArgumentTypes ... args)
+ReturnType Mock<ReturnType, ArgumentTypes...>::value(ArgumentTypes ... args)
 {
     AbstractCallHandler<ReturnType, ArgumentTypes...>* callHandlerPtr = getMatchingHandler(args...);
 
@@ -157,7 +179,7 @@ inline ReturnType Mock<ReturnType, ArgumentTypes...>::value(ArgumentTypes ... ar
 }
 
 template<typename ReturnType, typename ... ArgumentTypes>
-inline unsigned int Mock<ReturnType, ArgumentTypes...>::numberOfCalls(
+unsigned int Mock<ReturnType, ArgumentTypes...>::numberOfCalls(
     AbstractArgumentMatcher<ArgumentTypes>* ... matchersPtr) const
 {
     unsigned int nbrCall = 0;
@@ -182,7 +204,7 @@ void Mock<ReturnType, ArgumentTypes...>::setPolicy(MockPolicy<ReturnType, Argume
 }
 
 template<typename ReturnType, typename ... ArgumentTypes>
-inline void Mock<ReturnType, ArgumentTypes...>::clear()
+void Mock<ReturnType, ArgumentTypes...>::clear()
 {
     for (auto it = callHandlerList.begin(); it != callHandlerList.end(); ++it)
         delete *it;
